@@ -44,8 +44,10 @@ import {
   initUser,
   saveActivityLogsNotification,
   updateAgencyDetails,
+  upsertAgency,
 } from "@/lib/queries";
 import Loading from "../global/loading";
+import { v4 } from "uuid";
 
 interface AgencyDetailsProps {
   data?: Partial<Agency>;
@@ -118,11 +120,40 @@ const AgencyDetails: FC<AgencyDetailsProps> = ({ data }) => {
 
         // TODO : stripe stuff
         newUserData = await initUser({ role: "AGENCY_OWNER" });
+
+        const response = await upsertAgency({
+          id: data?.id ? data.id : v4(),
+          // customerId: data?.customerId || custId || "",
+          address: values.address,
+          agencyLogo: values.agencyLogo,
+          city: values.city,
+          companyPhone: values.companyPhone,
+          country: values.country,
+          name: values.name,
+          state: values.state,
+          whiteLabel: values.whiteLabel,
+          zipCode: values.zipCode,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          companyEmail: values.companyEmail,
+          connectAccountId: "",
+          goal: 5,
+        });
+
+        toast({
+          title: "Created Agency",
+        });
+
+        if (data?.id) return router.refresh();
+
+        if (response) {
+          return router.refresh();
+        }
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Oppse!",
+        title: "Oppsie!",
         description: "could not create your agency",
       });
     }
@@ -224,49 +255,6 @@ const AgencyDetails: FC<AgencyDetailsProps> = ({ data }) => {
                 />
               </div>
 
-              <div className="flex md:flex-row gap-4">
-                <FormField
-                  disabled={isLoading}
-                  control={form.control}
-                  name="companyPhone"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Agency Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Phone" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="whiteLabel"
-                render={({ field }) => {
-                  return (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border gap-4 p-4">
-                      <div>
-                        <FormLabel>Whitelabel Agency</FormLabel>
-                        <FormDescription>
-                          Turning on whilelabel mode will show your agency logo
-                          to all sub accounts by default. You can overwrite this
-                          functionality through sub account settings.
-                        </FormDescription>
-                      </div>
-
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  );
-                }}
-              />
               <FormField
                 disabled={isLoading}
                 control={form.control}
@@ -275,7 +263,7 @@ const AgencyDetails: FC<AgencyDetailsProps> = ({ data }) => {
                   <FormItem className="flex-1">
                     <FormLabel>Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="123 st..." {...field} />
+                      <Input placeholder="Address" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -326,20 +314,65 @@ const AgencyDetails: FC<AgencyDetailsProps> = ({ data }) => {
                   )}
                 />
               </div>
+
+              <div className="flex md:flex-row gap-4">
+                <FormField
+                  disabled={isLoading}
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Country</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Country" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  disabled={isLoading}
+                  control={form.control}
+                  name="companyPhone"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Agency Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Phone" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 disabled={isLoading}
                 control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Country</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Country" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                name="whiteLabel"
+                render={({ field }) => {
+                  return (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border gap-4 p-4">
+                      <div>
+                        <FormLabel>Whitelabel Agency</FormLabel>
+                        <FormDescription>
+                          Turning on whilelabel mode will show your agency logo
+                          to all sub accounts by default. You can overwrite this
+                          functionality through sub account settings.
+                        </FormDescription>
+                      </div>
+
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  );
+                }}
               />
+
               {data?.id && (
                 <div className="flex flex-col gap-2">
                   <FormLabel>Create A Goal</FormLabel>
@@ -373,7 +406,7 @@ const AgencyDetails: FC<AgencyDetailsProps> = ({ data }) => {
             </form>
           </Form>
 
-          {!data?.id && (
+          {data?.id && (
             <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
               <div className="text-muted-foreground">
                 Deleting your agency cannpt be undone. This will also delete all
