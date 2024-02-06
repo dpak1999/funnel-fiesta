@@ -265,9 +265,9 @@ const MenuOptions: FC<MenuOptionsProps> = ({
                     }
 
                     return (
-                      <CommandItem key={s.link} className="md:w-[320px] w-full">
+                      <CommandItem key={s.id} className="md:w-[320px] w-full">
                         <Link
-                          href={s.id}
+                          href={s.link}
                           className="flex items-center gap-2 hover:bg-transparent rounded-md transition-all md:w-full w-[320px]"
                         >
                           {val}
