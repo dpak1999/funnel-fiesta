@@ -64,7 +64,7 @@ const Infobar: FC<InfobarProps> = ({
               </div>
             </SheetTrigger>
             <SheetContent className="mt-4 mr-4 pr-4 overflow-scroll">
-              <SheetHeader className="text-left">
+              <SheetHeader className="text-left mb-4">
                 <SheetTitle>Notifications</SheetTitle>
                 <SheetDescription>
                   {(role === "AGENCY_ADMIN" || role === "AGENCY_OWNER") && (
